@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Week 6 Assignment: Digital Bookshelf Tracker</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 2rem;
+            background: #f4f4f9;
+            display: flex;
+            justify-content: center;
+        }
+
+        .dashboard {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* Filter Controls Styling */
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: #dee2e6;
+        }
+
+        .filter-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        /* Book Grid/List Styling */
+        .book-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .book-card {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            transition: transform 0.15s;
+        }
+
+        .book-info h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1.1rem;
+            color: #212529;
+        }
+
+        .book-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        /* Status Badges & Action Buttons */
+        .status-badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .status-unread {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-read {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .toggle-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        .toggle-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard">
+        <h2>📚 My Digital Bookshelf</h2>
+        <p>Manage your reading list and toggle statuses seamlessly using core state architectures.</p>
+
+        <!-- Filter Tabs -->
+        <div class="filter-group">
+            <button id="filterAll" class="filter-btn active">All Books</button>
+            <button id="filterRead" class="filter-btn">Read</button>
+            <button id="filterUnread" class="filter-btn">Unread</button>
+        </div>
+
+        <!-- Render Target Area -->
+        <div id="bookshelfDisplay" class="book-list">
+            <!-- Dynamic complex object elements inject here -->
+        </div>
+    </div>
+
+    <script>
+        // APPLICATION STATE - The Single Source of Truth
+        // An array holding complex objects with multiple key-value pairs
+        let myBookshelfState = [
+            { id: 1, title: "To Kill a Mockingbird", author: "Harper Lee", isRead: true },
+            { id: 2, title: "1984", author: "George Orwell", isRead: false },
+            { id: 3, title: "The Great Gatsby", author: "F. Scott Fitzgerald", isRead: true },
+            { id: 4, title: "Dune", author: "Frank Herbert", isRead: false }
+        ];
+
+        // Track the current active filter state ("all", "read", or "unread")
+        let currentFilter = "all";
+
+        function filterBookshelf(booksArray, filterType) {
+            if (filterType === "all") {
+                return booksArray;
+            }
+
+            let filteredBooks = [];
+
+            for (let book of booksArray) {
+                if (filterType === "read" && book.isRead === true) {
+                    filteredBooks.push(book);
+                } else if (filterType === "unread" && book.isRead === false) {
+                    filteredBooks.push(book);
+                }
+            }
+
+            return filteredBooks;
+        }
+
+        function renderBookshelf() {
+            let filteredBooks = filterBookshelf(myBookshelfState, currentFilter);
+            let bookshelfDisplay = document.querySelector("#bookshelfDisplay");
+
+            bookshelfDisplay.innerHTML = "";
+
+            for (let book of filteredBooks) {
+                let statusClass = book.isRead === true ? "status-read" : "status-unread";
+                let statusText = book.isRead === true ? "Read" : "Unread";
+
+                bookshelfDisplay.innerHTML += `
+                    <article class="book-card">
+                        <div class="book-info">
+                            <h3>${book.title}</h3>
+                            <p>By ${book.author}</p>
+                        </div>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </article>`;
+            }
+        }
+
+        let filterButtons = document.querySelectorAll(".filter-btn");
+
+        document.querySelector("#filterAll").addEventListener("click", function () {
+            currentFilter = "all";
+            filterButtons.forEach(button => button.classList.remove("active"));
+            this.classList.add("active");
+            renderBookshelf();
+        });
+
+        document.querySelector("#filterRead").addEventListener("click", function () {
+            currentFilter = "read";
+            filterButtons.forEach(button => button.classList.remove("active"));
+            this.classList.add("active");
+            renderBookshelf();
+        });
+
+        document.querySelector("#filterUnread").addEventListener("click", function () {
+            currentFilter = "unread";
+            filterButtons.forEach(button => button.classList.remove("active"));
+            this.classList.add("active");
+            renderBookshelf();
+        });
+
+        renderBookshelf();
+    </script>
+</body>
+
+</html>
